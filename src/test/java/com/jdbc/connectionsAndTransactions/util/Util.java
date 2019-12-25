@@ -1,4 +1,4 @@
-package com.jdbc.connectionsAndTransactions;
+package com.jdbc.connectionsAndTransactions.util;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 public class Util {
+	
+	public static final String connectionUrl = "jdbc:h2:mem:db;DB_CLOSE_DELAY=-1";
 	
 	private Util() {}
 	
@@ -49,56 +51,9 @@ public class Util {
 		return connectionsInformations;
 	}
 	
-	
-	
-	
-	
-	public static void insertItem(Connection connection) throws SQLException {
-		connection.createStatement().execute("insert into items (name)"
-				+ " values ('Windows 10 Premium Edition')");
-	}
-
-	public static void insertBid1(Connection connection) throws SQLException {
-		connection.createStatement().execute("insert into bids (user,"
-				+ " time, amount, currency) values ('Hans', now(), 1"
-				+ ", 'EUR')");
-	}
-	
-	public static void insertBid2(Connection connection) throws SQLException {
-		connection.createStatement().execute("insert into bids (user,"
-				+ " time, amount, currency) values ('Franz',now() ,"
-				+ " 2" + ", 'EUR')");
-	}
-	
 	public static void insertInvalidBid(Connection connection) throws SQLException {
 		connection.createStatement().execute("insert into bidz (user,"
 				+ " time, amount, currency) values ('Frank',now() ,"
 				+ " 3" + ", 'EUR')");
 	}
-	
-	public static void createItems(Connection conn) throws SQLException {
-		conn.createStatement().execute("create table items (id"
-				+ " identity, name VARCHAR)");
-	}
-	
-	public static void createItemsWithUniqueName(Connection conn) throws SQLException {
-		conn.createStatement().execute("create table items (id " +
-				"identity, name VARCHAR unique)");
-	}
-	
-	public static void createBids(Connection conn) throws SQLException {
-		conn.createStatement().execute("create table bids "
-				+ "(id identity, user VARCHAR, time TIMESTAMP ,"
-				+ " amount NUMBER, currency VARCHAR)");
-	}
-	
-	public static void dropItems(Connection conn) throws SQLException {
-		conn.createStatement().executeUpdate("drop table items");
-	}
-	
-	public static void dropBids(Connection conn) throws SQLException {
-		conn.createStatement().executeUpdate("drop table bids");
-	}
-
-
 }

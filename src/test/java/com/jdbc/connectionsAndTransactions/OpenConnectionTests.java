@@ -13,13 +13,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.TestPropertySource;
 
+import com.jdbc.connectionsAndTransactions.util.Util;
+
 @DataJpaTest
 @TestPropertySource("classpath:h2-test-db.properties")
 class OpenConnectionTests {
 
 	@Test
 	void getConnection_ShouldOpenOneConnection() {
-		try (Connection conn = DriverManager.getConnection("jdbc:h2:mem:db;DB_CLOSE_DELAY=-1")) {
+		try (Connection conn = DriverManager.getConnection(Util.connectionUrl)) {
 			printConnectionInformation(conn);
 			int connectionsCount = Util.getRowsCountFromTable(conn, "information_schema.sessions");
 			assertThat(connectionsCount).isEqualTo(1);

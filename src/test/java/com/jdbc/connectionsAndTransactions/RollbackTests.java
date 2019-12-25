@@ -12,12 +12,30 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.TestPropertySource;
 
 import com.jdbc.connectionsAndTransactions.jdbc.JdbcConnectionManager;
+import com.jdbc.connectionsAndTransactions.model.Bid;
+import com.jdbc.connectionsAndTransactions.repository.BidRepository;
+import com.jdbc.connectionsAndTransactions.repository.ItemRepository;
+import com.jdbc.connectionsAndTransactions.util.Util;
 
 @DataJpaTest
 @TestPropertySource("classpath:h2-test-db.properties")
 class RollbackTests {
 
-	private JdbcConnectionManager jdbcConnectionManager = new JdbcConnectionManager("jdbc:h2:mem:db;DB_CLOSE_DELAY=-1");
+	private JdbcConnectionManager jdbcConnectionManager = new JdbcConnectionManager(Util.connectionUrl);
+	
+	private BidRepository bidRepository = new BidRepository();
+	private ItemRepository itemRepository = new ItemRepository();
+	
+	private final Bid bid1 = Bid.builder()
+			.user("Hans")
+			.amount(1)
+			.currency("EUR")
+			.build();
+	private final Bid bid2 = Bid.builder()
+			.user("Franz")
+			.amount(2)
+			.currency("EUR")
+			.build();
 	
 	@BeforeEach
 	public void createTables() {
@@ -33,9 +51,9 @@ class RollbackTests {
 	public void rollback_ShouldRevertTransaction_WhenAutoCommitDisabled() throws SQLException {
 		try (Connection connection = jdbcConnectionManager.createConnection()) {
 			connection.setAutoCommit(false);
-			Util.insertItem(connection);
-			Util.insertBid1(connection);
-			Util.insertBid2(connection);
+			itemRepository.save(connection, "Windows 10 Premium Edition");
+			bidRepository.save(connection, bid1);
+			bidRepository.save(connection, bid2);
 			// rollback() undoes any changes in the current transaction.
 			// It must be triggered before commit(), because when you call commit(),
 			// you complete/close the current transaction.
@@ -51,13 +69,13 @@ class RollbackTests {
 	}
 	
 	private void createTables(Connection conn) throws SQLException {
-		Util.createItems(conn);
-		Util.createBids(conn);
+		itemRepository.createTable(conn);
+		bidRepository.createTable(conn);
 	}
 	
 	private void dropTables(Connection conn) throws SQLException {
-		Util.dropItems(conn);
-		Util.dropBids(conn);
+		itemRepository.dropTable(conn);
+		bidRepository.dropTable(conn);
 	}
 	
 }
