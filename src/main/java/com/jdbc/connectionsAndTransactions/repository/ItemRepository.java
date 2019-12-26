@@ -30,6 +30,12 @@ public class ItemRepository {
 				+ "identity, release_date date, name VARCHAR unique)");
 	}
 	
+	public void createTableWithVersion(Connection conn) throws SQLException {
+		conn.createStatement().execute("create table items (id "
+				+ "identity, release_date date, name VARCHAR,"
+				+ " version NUMBER default 0)");
+	}
+	
 	public void dropTable(Connection conn) throws SQLException {
 		conn.createStatement().executeUpdate("drop table items");
 	}
