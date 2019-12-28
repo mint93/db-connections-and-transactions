@@ -10,8 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.TestPropertySource;
 
+import com.jdbc.connectionsAndTransactions.model.Item;
 import com.jdbc.connectionsAndTransactions.repository.ItemRepository;
-import com.jdbc.connectionsAndTransactions.util.Util;
+import com.jdbc.connectionsAndTransactions.util.JdbcUtil;
 import com.p6spy.engine.spy.P6DataSource;
 
 @DataJpaTest
@@ -27,17 +28,17 @@ public class DatasourceLoggingProxyTests {
 		DataSource datassource = getDataSource();
 		try (Connection conn = datassource.getConnection()) {
 			itemRepository.createTable(conn);
-			itemRepository.save(conn, "item1");
+			itemRepository.save(conn, new Item("item name"));
+			itemRepository.dropTable(conn);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
 	}
 
 	private DataSource getDataSource() {
 		JdbcDataSource datasource = new JdbcDataSource();
-		datasource.setURL(Util.connectionUrl);
-		datasource.setUser("sa");
+		datasource.setURL(JdbcUtil.connectionUrl);
+		datasource.setUser(JdbcUtil.username);
 		return new P6DataSource(datasource);
 	}
 	

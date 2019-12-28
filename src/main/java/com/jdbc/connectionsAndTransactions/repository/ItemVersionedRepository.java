@@ -6,8 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
@@ -15,22 +13,15 @@ import org.springframework.stereotype.Repository;
 import com.jdbc.connectionsAndTransactions.model.Item;
 
 @Repository
-public class ItemRepository {
+public class ItemVersionedRepository extends ItemRepository {
 
-	public Item save(Connection connection, Item item) throws SQLException {
-		Optional<Item> foundItem = item.getId() != null ? findById(connection, item.getId()) : Optional.empty();
-		if (foundItem.isPresent()) {
-			return update(connection, item, foundItem.get());
-		} else {
-			return insert(connection, item);
-		}
-	}
-
+	@Override
 	protected Item insert(Connection connection, Item item) throws SQLException {
-		String sql = "insert into items (name, release_date) values (?, ?)";
+		String sql = "insert into items (name, release_date, version) values (?, ?, ?)";
 		PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 		preparedStatement.setString(1, item.getName());
 		preparedStatement.setDate(2, Date.valueOf(item.getReleaseDate()));
+		preparedStatement.setInt(3, 0);
 		int affectedRows = preparedStatement.executeUpdate();
 		if (affectedRows > 0) {
             try (ResultSet rs = preparedStatement.getGeneratedKeys()) {
@@ -44,33 +35,30 @@ public class ItemRepository {
 		return null;
 	}
 
+	@Override
 	protected Item update(Connection connection, Item newItem, Item oldItem) throws SQLException {
-		String sql = "update items set name = ?, release_date = ? where id = ?";
+		String sql = "update items set name = ?, release_date = ?, version = ? where id = ? and version = ?";
 		PreparedStatement preparedStatement = connection.prepareStatement(sql);
 		preparedStatement.setString(1, newItem.getName());
 		preparedStatement.setDate(2, Date.valueOf(newItem.getReleaseDate()));
-		preparedStatement.setInt(3, oldItem.getId());
-		preparedStatement.executeUpdate();
-		return new Item(oldItem.getId(), newItem.getName(), newItem.getReleaseDate(), newItem.getVersion());
+		int actualVersion = newItem.getVersion();
+		int newVersion = actualVersion+1;
+		preparedStatement.setInt(3, newVersion);
+		preparedStatement.setInt(4, oldItem.getId());
+		preparedStatement.setInt(5, actualVersion);
+		int affectedRows = preparedStatement.executeUpdate();
+		if (affectedRows > 0) {
+			return new Item(oldItem.getId(), newItem.getName(), newItem.getReleaseDate(), newVersion);
+        } else {
+        	throw new OptimisticLockingException();
+        }
 	}
 	
+	@Override
 	public Optional<Item> findById(Connection connection, int id) throws SQLException {
 		String sql = "select * from items where id = ?";
 		PreparedStatement statement = connection.prepareStatement(sql);
 		statement.setInt(1, id);
-		try (ResultSet resultSet = statement.executeQuery()) {
-			if (resultSet.next()) {				
-				return Optional.of(new Item(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getDate("release_date").toLocalDate(), null));
-			} else {
-				return Optional.empty();
-			}
-		}
-	}
-	
-	public Optional<Item> findByName(Connection connection, String name) throws SQLException {
-		String sql = "select * from items where name = ?";
-		PreparedStatement statement = connection.prepareStatement(sql);
-		statement.setString(1, name);
 		try (ResultSet resultSet = statement.executeQuery()) {
 			if (resultSet.next()) {				
 				return Optional.of(new Item(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getDate("release_date").toLocalDate(), resultSet.getInt("version")));
@@ -80,28 +68,22 @@ public class ItemRepository {
 		}
 	}
 
+	@Override
 	public void createTable(Connection conn) throws SQLException {
 		conn.createStatement().execute("create table items (id "
-				+ "identity, release_date date, name VARCHAR)");
+				+ "identity, release_date date, name VARCHAR,"
+				+ " version NUMBER default 0)");
 	}
 	
+	@Override
 	public void createTableWithUniqueName(Connection conn) throws SQLException {
 		conn.createStatement().execute("create table items (id "
-				+ "identity, release_date date, name VARCHAR unique)");
+				+ "identity, release_date date, name VARCHAR unique,"
+				+ " version NUMBER default 0)");
 	}
 	
-	public void dropTable(Connection conn) throws SQLException {
-		conn.createStatement().executeUpdate("drop table items");
-	}
-	
-	public List<String> findNames(Connection conn) throws SQLException {
-		try (ResultSet resultSet = conn.createStatement().executeQuery("select * from items;")) {
-			List<String> names = new ArrayList<>();
-			while (resultSet.next()) {
-				names.add(resultSet.getString("name"));
-			}
-			return names;
-		}
+	public static class OptimisticLockingException extends RuntimeException {
+		private static final long serialVersionUID = 1211444357929277049L;
 	}
 	
 }

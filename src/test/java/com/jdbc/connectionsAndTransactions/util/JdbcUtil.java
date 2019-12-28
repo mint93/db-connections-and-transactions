@@ -8,11 +8,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Util {
+public class JdbcUtil {
 	
+	public static final String username = "sa";
+	public static final String password = null;
 	public static final String connectionUrl = "jdbc:h2:mem:db;DB_CLOSE_DELAY=-1";
 	
-	private Util() {}
+	private JdbcUtil() {}
 	
 	public static int getRowsCountFromTable(Connection connection, String tableName) {
 		try (ResultSet resultSet = connection.createStatement().executeQuery("select count(*) as amount from " + tableName + ";")) {

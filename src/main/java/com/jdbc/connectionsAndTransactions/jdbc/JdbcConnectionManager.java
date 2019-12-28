@@ -9,16 +9,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class JdbcConnectionManager {
 
+	private final String username;
+	private final String password;
 	private final String connectionUrl;
 
-	public JdbcConnectionManager(String connection) {
+	public JdbcConnectionManager(String username, String password, String connection) {
+		this.username = username;
+		this.password = password;
 		this.connectionUrl = connection;
 	}
 	
 	public Connection createConnection() {
 		Connection connection = null;
 		try {
-			connection = DriverManager.getConnection(connectionUrl);
+			connection = DriverManager.getConnection(connectionUrl, username, password);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
