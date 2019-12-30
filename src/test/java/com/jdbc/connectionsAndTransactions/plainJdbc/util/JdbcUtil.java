@@ -1,4 +1,4 @@
-package com.jdbc.connectionsAndTransactions.util;
+package com.jdbc.connectionsAndTransactions.plainJdbc.util;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

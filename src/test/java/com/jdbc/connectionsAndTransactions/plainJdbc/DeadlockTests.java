@@ -1,4 +1,4 @@
-package com.jdbc.connectionsAndTransactions;
+package com.jdbc.connectionsAndTransactions.plainJdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,8 +13,8 @@ import org.springframework.test.context.TestPropertySource;
 
 import com.jdbc.connectionsAndTransactions.jdbc.JdbcConnectionManager;
 import com.jdbc.connectionsAndTransactions.model.Item;
+import com.jdbc.connectionsAndTransactions.plainJdbc.util.JdbcUtil;
 import com.jdbc.connectionsAndTransactions.repository.ItemRepository;
-import com.jdbc.connectionsAndTransactions.util.JdbcUtil;
 
 @DataJpaTest
 @TestPropertySource("classpath:h2-test-db.properties")

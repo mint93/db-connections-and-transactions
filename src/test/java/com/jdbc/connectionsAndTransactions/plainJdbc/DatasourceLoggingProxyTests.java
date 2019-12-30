@@ -1,4 +1,4 @@
-package com.jdbc.connectionsAndTransactions;
+package com.jdbc.connectionsAndTransactions.plainJdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -11,8 +11,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.TestPropertySource;
 
 import com.jdbc.connectionsAndTransactions.model.Item;
+import com.jdbc.connectionsAndTransactions.plainJdbc.util.JdbcUtil;
 import com.jdbc.connectionsAndTransactions.repository.ItemRepository;
-import com.jdbc.connectionsAndTransactions.util.JdbcUtil;
 import com.p6spy.engine.spy.P6DataSource;
 
 @DataJpaTest
@@ -24,7 +24,7 @@ public class DatasourceLoggingProxyTests {
 	// SingleLineFormat (by default):
 	// current time|execution time|category|connection id|statement SQL String|effective SQL string
 	@Test
-	public void whenUpdatedRowsCount_ForOldVersionIsZero_ThenExceptionShouldBeThrown() throws SQLException {
+	public void testLogging() throws SQLException {
 		DataSource datassource = getDataSource();
 		try (Connection conn = datassource.getConnection()) {
 			itemRepository.createTable(conn);

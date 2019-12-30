@@ -1,4 +1,4 @@
-package com.jdbc.connectionsAndTransactions;
+package com.jdbc.connectionsAndTransactions.plainJdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,7 +12,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.TestPropertySource;
 
 import com.jdbc.connectionsAndTransactions.jdbc.JdbcConnectionManager;
-import com.jdbc.connectionsAndTransactions.util.JdbcUtil;
+import com.jdbc.connectionsAndTransactions.plainJdbc.util.JdbcUtil;
 
 @DataJpaTest
 @TestPropertySource("classpath:h2-test-db.properties")
